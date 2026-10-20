@@ -10,4 +10,9 @@ export class OrdersController {
   list(@Query() query: ListOrdersQueryDto) {
     return this.ordersService.findAll(query);
   }
+
+  @Get('stats')
+  async getOrderStats(@Query() query: ListOrdersQueryDto) {
+    return this.ordersService.getOrderStatistics(query);
+  }
 }
