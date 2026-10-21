@@ -1,5 +1,5 @@
 import { OrdersService } from './orders.service';
-import { ListOrdersQuery } from './list-orders.query';
+import { ListOrdersQueryDto, OrderStatus, SortField, SortOrder } from './list-orders.query';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -8,21 +8,38 @@ describe('OrdersService', () => {
     service = new OrdersService();
   });
 
-  it('returns the requested page when no status filter is supplied', () => {
-    const result = service.list({ page: 1, pageSize: 2 } as ListOrdersQuery);
-
-    expect(result.data.map((order) => order.id)).toEqual([101, 102]);
-    expect(result.meta).toEqual({
+  it('returns the requested page when no status filter is supplied', async () => {
+    const query = {
       page: 1,
-      pageSize: 2,
-      total: 9,
-      totalPages: 5,
+      limit: 2,
+      sortBy: SortField.CREATED_AT,
+      sortOrder: SortOrder.DESC
+    }
+
+    const result = await service.findAll(query);
+
+    expect(result.data.map((order) => order.id)).toEqual([60, 59]);
+    expect(result.meta).toEqual({
+      "page": 1,
+      "limit": 2,
+      "totalItems": 60,
+      "totalPages": 30,
+      "hasNextPage": true,
+      "hasPreviousPage": false
     });
   });
 
-  it('supports a later unfiltered page', () => {
-    const result = service.list({ page: 2, pageSize: 2 } as ListOrdersQuery);
+  it('supports a status filter when supplied', async () => {
+    const query = {
+      page: 1,
+      limit: 2,
+      status: OrderStatus.PENDING,
+      sortBy: SortField.CREATED_AT,
+      sortOrder: SortOrder.DESC
+    }
 
-    expect(result.data.map((order) => order.id)).toEqual([103, 104]);
+    const result = await service.findAll(query);
+
+    expect(result.data.map((order) => order.id)).toEqual([60, 56]);
   });
 });
